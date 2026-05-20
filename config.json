@@ -1,3 +1,4 @@
 {
-    "app_name": "Aether"
+    "app_name": "Aether",
+    "json_config_url": "http://localhost:8000/versions.json"
 }

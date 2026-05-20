@@ -2,12 +2,13 @@ use eframe::egui;
 use std::sync::{Arc, Mutex};
 use std::thread;
 
-use crate::download::download_with_fallback;
+use crate::download::download_latest;
 use crate::i18n::I18n;
 use crate::ui;
 
 pub enum Step {
     Loading,
+    Welcome,
     License,
     Downloading,
     Finished,
@@ -75,7 +76,18 @@ impl eframe::App for InstallerApp {
         match self.step {
             Step::Loading => {
                 ui::loading::show(ctx, &self.i18n);
-                self.step = Step::License;
+                self.step = Step::Welcome;
+            }
+
+            Step::Welcome => {
+                let (continue_clicked, cancel) =
+                    ui::welcome::show(ctx, &self.i18n);
+
+                if continue_clicked {
+                    self.step = Step::License;
+                } else if cancel {
+                    self.step = Step::Failed;
+                }
             }
 
             Step::License => {
@@ -128,27 +140,13 @@ impl InstallerApp {
         let str_trying    = self.i18n.t("trying").to_string();
         let str_verifying = self.i18n.t("verifying").to_string();
         let str_ok        = self.i18n.t("download_ok").to_string();
-        let str_checksum  = self.i18n.t("err_checksum").to_string();
-        let str_all_fail  = self.i18n.t("err_all_failed").to_string();
 
         thread::spawn(move || {
-            let servers = vec![
-                "https://server1/app.bin",
-                "https://server2/app.bin",
-            ];
-
-            let expected_hash = "PUT_REAL_SHA256_HERE";
-
-            let result = download_with_fallback(
-                servers,
-                "app.bin",
-                expected_hash,
+            let result = download_latest(
                 progress.clone(),
                 status.clone(),
                 &str_trying,
                 &str_verifying,
-                &str_checksum,
-                &str_all_fail,
             );
 
             let mut status_lock = status.lock().unwrap();
