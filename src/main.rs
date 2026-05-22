@@ -1,6 +1,8 @@
 mod app;
 mod config_download;
 mod download;
+mod install_options;
+mod release;
 mod i18n;
 mod ui;
 mod helper;

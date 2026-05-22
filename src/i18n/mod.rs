@@ -21,21 +21,11 @@ mod nb;
 mod hu;
 mod ro;
 
-use serde::Deserialize;
 use std::collections::HashMap;
-
-#[derive(Deserialize)]
-struct Config {
-    app_name: String,
-}
+use crate::helper::{load_config};
 
 pub struct I18n {
   pub strings : HashMap<&'static str, String>,
-}
-
-fn load_config() -> Config {
-    let data = include_str!("../../config.json");
-    serde_json::from_str(data).expect("Invalid config.json")
 }
 
 impl I18n {
